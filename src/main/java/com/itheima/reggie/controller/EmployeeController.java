@@ -57,7 +57,10 @@ public class EmployeeController {
     request.getSession().removeAttribute("employee");
     return Result.success("退出登录成功");
   }
+<<<<<<< HEAD
 
   @PostMapping("/page")
   public Result<Employee> page() {}
+=======
+>>>>>>> origin/main
 }
