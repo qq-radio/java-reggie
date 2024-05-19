@@ -1,6 +1,8 @@
 package com.itheima.reggie.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.itheima.reggie.common.Result;
 import com.itheima.reggie.entity.Employee;
 import com.itheima.reggie.service.EmployeeService;
@@ -8,10 +10,11 @@ import javax.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.DigestUtils;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Date;
 
 @Slf4j
 @RestController
@@ -57,10 +60,59 @@ public class EmployeeController {
     request.getSession().removeAttribute("employee");
     return Result.success("退出登录成功");
   }
-<<<<<<< HEAD
 
-  @PostMapping("/page")
-  public Result<Employee> page() {}
-=======
->>>>>>> origin/main
+  @GetMapping("/page")
+  public Result<Page> page(int page, int pageSize, String name) {
+    Page p = new Page(page, pageSize);
+
+    LambdaQueryWrapper<Employee> lambdaQueryWrapper = new LambdaQueryWrapper();
+    lambdaQueryWrapper.like(StringUtils.isNotBlank(name), Employee::getName, name);
+    lambdaQueryWrapper.orderByDesc(Employee::getUpdateTime);
+
+    employeeService.page(p, lambdaQueryWrapper);
+
+    return Result.success(p);
+  }
+
+  @PostMapping
+  public Result<String> add(HttpServletRequest request, @RequestBody Employee employee) {
+    employee.setPassword(DigestUtils.md5DigestAsHex("123456".getBytes()));
+
+    //    采用MyMetaObjecthandler自动填充
+    //    employee.setCreateTime(LocalDateTime.now());
+    //    employee.setUpdateTime(LocalDateTime.now());
+    //
+    //    Long empId = (Long) request.getSession().getAttribute("employee");
+    //
+    //    employee.setCreateUser(empId);
+    //    employee.setUpdateUser(empId);
+
+    employeeService.save(employee);
+
+    return Result.success("新增成功了");
+  }
+
+  @GetMapping("/{id}")
+  public Result<Employee> query(@PathVariable Long id) {
+    Employee employee = employeeService.getById(id);
+
+    if (employee != null) {
+      return Result.success(employee);
+    }
+
+    return Result.error("没有查到员工信息");
+  }
+
+  @PutMapping
+  public Result<String> update(HttpServletRequest request, @RequestBody Employee employee) {
+    //    采用MyMetaObjecthandler自动填充
+    //    employee.setUpdateTime(LocalDateTime.now());
+    //
+    //    Long empId = (Long) request.getSession().getAttribute("employee");
+    //    employee.setUpdateUser(empId);
+
+    employeeService.updateById(employee);
+
+    return Result.success("更新成成功了");
+  }
 }
