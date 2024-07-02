@@ -8,6 +8,8 @@ import com.itheima.reggie.service.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RequestMapping("/category")
 @RestController
 public class CategoryController {
@@ -41,5 +43,17 @@ public class CategoryController {
   public Result<String> delete(Long id) {
     categoryService.remove(id);
     return Result.success("删除成功 这次");
+  }
+
+  /** qq：这个接口是用来给新增菜品页面的菜品分类下拉框接口用，虽然只需要查询条件type 但是为了让这个接口更加的通用，这里还是用Category category比较好 */
+  @GetMapping("/list")
+  public Result<List<Category>> list(Category category) {
+
+    LambdaQueryWrapper<Category> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+    lambdaQueryWrapper.eq(category.getType() != null, Category::getType, category.getType());
+
+    List<Category> categories = categoryService.list(lambdaQueryWrapper);
+
+    return Result.success(categories);
   }
 }
